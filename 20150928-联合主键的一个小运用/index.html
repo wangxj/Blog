@@ -1,0 +1,408 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>联合主键的一个小运用 | 王潇贱的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="王潇贱">
+    
+    <meta name="description" itemprop="description" content="APP集成了融云，退出时，运用联合主键实现用户资料复用">
+    
+    
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="wrwxj" />
+    <meta name="twitter:title" content="联合主键的一个小运用 | 王潇贱的博客" />
+      
+        <meta name="twitter:description" content="APP集成了融云，退出时，运用联合主键实现用户资料复用" />
+      
+    
+    
+    <link rel="alternate" href="/atom.xml" title="王潇贱的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/pacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/pacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+	
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?82e717c0e33a461c8c17adb568e2e5bb";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="王潇贱的博客" title="王潇贱的博客"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="王潇贱的博客">王潇贱的博客</a></h1>
+				<h2 class="blog-motto">Stay Hungry, Stay Foolish</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/categories">分类</a></li>
+					
+						<li><a href="/about">简介</a></li>
+					
+					<li>
+					
+						<form class="search" action="/search/index.html" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" class="st-default-search-input" maxlength="20" placeholder="Search" />
+						</form>
+					
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','Ugcdk5XQe4zxWzDj_D3E','2.0.0');
+</script>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/20150928-联合主键的一个小运用/" title="联合主键的一个小运用" itemprop="url">联合主键的一个小运用</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="https://plus.google.com/109760436008561980000?rel=author" title="王潇贱" target="_blank" itemprop="author">王潇贱</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2015-09-28T06:50:59.000Z" itemprop="datePublished">2015-09-28</time>
+    更新日期:<time datetime="2015-09-28T08:49:32.050Z" itemprop="dateModified">2015-09-28</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#联合主键"><span class="toc-number">1.</span> <span class="toc-text">联合主键</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#主键"><span class="toc-number">1.1.</span> <span class="toc-text">主键</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#联合主键-1"><span class="toc-number">1.2.</span> <span class="toc-text">联合主键</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#联合主键实践"><span class="toc-number">1.3.</span> <span class="toc-text">联合主键实践</span></a></li></ol></li></ol>
+		</div>
+		
+		<blockquote>
+<p>前言：<br>公司APP使用融云实现单向匿名聊天，思路就是当用户创建会话后，每发送一条消息，服务器把这条消息的内容，通过一个新生成的虚拟用户，向目标用户发送信息，这样实现了单向匿名聊天。</p>
+<p>虚拟用户的userifo是随着发送过来的messge的extra参数传递，通过解析extra，把userinfo插入到自己的数据库中。在融云的API中，getUserInfo方法来调用会话列表的相关用户信息，然后保存到融云自己的数据库中。</p>
+<p>其中遇到了比较困扰的问题：每次切换用户，我会清空自己数据库中的userinfo信息，重新调用融云的会话列表。可是重新调用后，会话列表信息存在，用户信息他们给清空了。牵扯到数据结构问题，如果我不清空自己本地的数据库userinfo信息的话，另外的用户调用就会混乱。<br>最后使用了联合主键，解决了这个问题。</p>
+</blockquote>
+<h1 id="联合主键">联合主键</h1><p>这之前，先讲讲什么是主键。</p>
+<h2 id="主键">主键</h2><p>主键:是数据库约束的一种类型，作用是确保数据唯一性。自增主键的作用还可以用来提高检索速度</p>
+<p>约束就是在表的数据列上强制执行的规则。这些是用来限制可以插入到表中的数据类型。这确保了数据库中数据的准确性和可靠性。约束可以是列级或表级。列级约束仅适用于列，表级约束被应用到整个表。</p>
+<p>以下是在 SQLite 中常用的约束。<br><figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="literal">NOT</span> <span class="literal">NULL</span> 约束：确保某列不能有 <span class="literal">NULL</span> 值。</span><br><span class="line"><span class="keyword">DEFAULT</span> 约束：当某列没有指定值时，为该列提供默认值。</span><br><span class="line">UNIQUE 约束：确保某列中的所有值是不同的。</span><br><span class="line">PRIMARY Key 约束：唯一标识数据库表中的各行/记录。</span><br><span class="line">CHECK 约束：CHECK 约束确保某列中的所有值满足一定条件。</span><br></pre></td></tr></table></figure></p>
+<p>其中Primar Key 就是主键约束，用来确保建表时，整个表的当前值唯一。</p>
+<h2 id="联合主键-1">联合主键</h2><p>联合主键:我的理解就是共同的几个值联合创建的主键。通过这两个或多个值，数据的唯一性。</p>
+<p>具体使用方法，在建表时<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> tb_test ( </span><br><span class="line">bh <span class="built_in">varchar</span>(<span class="number">5</span>), </span><br><span class="line"><span class="keyword">id</span> <span class="built_in">integer</span>, </span><br><span class="line">ch <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">mm <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">primary <span class="keyword">key</span> (<span class="keyword">id</span>,bh));</span></span><br></pre></td></tr></table></figure></p>
+<p><em>注意：在创建联合主键时，主键创建要放在所有字段最后面，否则也会创建失败</em></p>
+<p>这样建出来的tb_test表，id与bh的组合，就不用有相同的了。有可能有id相同，bh不同的数据，或者bh相同，id不同的数据，但是绝对不会有id与bh相同的数据。</p>
+<h2 id="联合主键实践">联合主键实践</h2><p>回到前言中的问题，建立userinfo数据库表时，我使用了userid（用户登录的id）与conversationID（会话id）两个字段来充当联合主键，切换用户时，不清空userinfo的数据，再次登录时，通过这两个值，来查找数据，拿到userinfo信息。</p>
+<p>因为使用了联合主键，所以查到的userinfo信息是唯一的，问题得到解决。</p>
+<p>平时喜欢刷微博，并且有两个微博账号，所以去微博的数据库下看了看，他们也是通过联合主键，来区分不同用户的一些数据的。</p>
+<p><img src="http://7xl70l.com1.z0.glb.clouddn.com/20150818QQ截图20150928164722.png" alt="微博数据库follow_table"></p>
+<p>这个表是用user_id和id创建的联合主键，这样保证搜索“罗永浩”这个信息时，能搜索到相对应userid下的“罗永浩”的信息。</p>
+<p>参考文章：<br><em><a href="http://www.runoob.com/sqlite/sqlite-constraints.html" target="_blank" rel="external">http://www.runoob.com/sqlite/sqlite-constraints.html</a></em></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Android/">Android</a>
+</div>
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://wangruiblog.com/20150928-联合主键的一个小运用/" data-title="联合主键的一个小运用 | 王潇贱的博客" data-tsina="王潇贱" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/20150928-EditText输入法默认弹出或者不弹出的设置/" title="EditText输入法默认弹出或者不弹出的设置">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  EditText输入法默认弹出或者不弹出的设置</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/20150921-英语积累20150921/"  title="英语积累20150921">
+ <strong>NEXT:</strong><br/> 
+ <span>英语积累20150921
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#联合主键"><span class="toc-number">1.</span> <span class="toc-text">联合主键</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#主键"><span class="toc-number">1.1.</span> <span class="toc-text">主键</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#联合主键-1"><span class="toc-number">1.2.</span> <span class="toc-text">联合主键</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#联合主键实践"><span class="toc-number">1.3.</span> <span class="toc-text">联合主键实践</span></a></li></ol></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/Android/" title="Android">Android<sup>5</sup></a></li>
+		
+			<li><a href="/categories/健康/" title="健康">健康<sup>1</sup></a></li>
+		
+			<li><a href="/categories/感悟/" title="感悟">感悟<sup>1</sup></a></li>
+		
+			<li><a href="/categories/旅游/" title="旅游">旅游<sup>12</sup></a></li>
+		
+			<li><a href="/categories/英语学习/" title="英语学习">英语学习<sup>5</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+  <div class="archiveslist">
+    <p class="asidetitle"><a href="/archives">归档</a></p>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">17</span></li></ul>
+  </div>
+
+
+  
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+      <li><a href="http://yangjian.me" target="_blank" title="YangJian">Alimon's Blog</a></li>
+      <li><a href="http://hexo.io" target="_blank" title="Hexo">Hexo</a></li>
+    </ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 欢迎来到我的博客 <br/>
+			记录，积累，分享，过自己喜欢的生活</p>
+	</section>
+	 
+	<div class="social-font clearfix">
+		
+		<a href="http://weibo.com/wrwxj" target="_blank" title="weibo"></a>
+		
+		
+		<a href="https://twitter.com/wrwxj" target="_blank" title="twitter"></a>
+		
+		
+		<a href="https://github.com/wangxj" target="_blank" title="github"></a>
+		
+		
+		
+		
+        <a href="https://www.instagram.com/wangrui1988" target="_blank" title="instagram"></a>
+        
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2016 
+		
+		<a href="http://wangruiblog.com" target="_blank" title="王潇贱">王潇贱</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"wangruiblog"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-67830532-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+  </body>
+</html>
