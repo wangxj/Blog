@@ -1,0 +1,416 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>正确的单例模式 | 王潇贱的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="王潇贱">
+    
+    <meta name="description" itemprop="description" content="老生常谈">
+    
+    
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="wrwxj" />
+    <meta name="twitter:title" content="正确的单例模式 | 王潇贱的博客" />
+      
+        <meta name="twitter:description" content="老生常谈" />
+      
+    
+    
+    <link rel="alternate" href="/atom.xml" title="王潇贱的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/pacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/pacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+	
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?82e717c0e33a461c8c17adb568e2e5bb";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="王潇贱的博客" title="王潇贱的博客"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="王潇贱的博客">王潇贱的博客</a></h1>
+				<h2 class="blog-motto">Stay Hungry, Stay Foolish</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/categories">分类</a></li>
+					
+						<li><a href="/about">简介</a></li>
+					
+					<li>
+					
+						<form class="search" action="/search/index.html" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" class="st-default-search-input" maxlength="20" placeholder="Search" />
+						</form>
+					
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','Ugcdk5XQe4zxWzDj_D3E','2.0.0');
+</script>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/20160424-正确的单例模式/" title="正确的单例模式" itemprop="url">正确的单例模式</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="https://plus.google.com/109760436008561980000?rel=author" title="王潇贱" target="_blank" itemprop="author">王潇贱</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2016-04-24T10:43:39.000Z" itemprop="datePublished">2016-04-24</time>
+    更新日期:<time datetime="2016-05-02T13:43:41.089Z" itemprop="dateModified">2016-05-02</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#定义"><span class="toc-number">1.</span> <span class="toc-text">定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#懒汉式，线程不安全"><span class="toc-number">2.</span> <span class="toc-text">懒汉式，线程不安全</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#懒汉式，线程安全"><span class="toc-number">3.</span> <span class="toc-text">懒汉式，线程安全</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#双重检验锁模式（double_checked_locking_pattern）"><span class="toc-number">4.</span> <span class="toc-text">双重检验锁模式（double checked locking pattern）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#饿汉式_static_final_field"><span class="toc-number">5.</span> <span class="toc-text">饿汉式 static final field</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静态内部类_static_nested_class"><span class="toc-number">6.</span> <span class="toc-text">静态内部类 static nested class</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#枚举模式_Enum"><span class="toc-number">7.</span> <span class="toc-text">枚举模式 Enum</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+		</div>
+		
+		<p>总结一篇大家都知道，但是可能又一知半解的知识点，单例模式。</p>
+<h2 id="定义">定义</h2><p>单例模式：确保一个类只有一个实例，并提供全局访问点。<br>其作用就在某些情况下，类对象只能有一个实例。如果有多个实例，就会导致很多问题产生。譬如：程序的行为异常，资源使用过量，或者是不一致的结果。<br>单例的好处就是确保只有一个实例会被创建，不需要程序员之间约束，只提供唯一一个全局访问点入口，和静态全局变量一样方便，但是又没有全局变量的缺点。</p>
+<blockquote>
+<p>全局变量的缺点：程序一开始时就创建好对象，赋值给全局变量（当然部分JVM是在用到的时候才创建对象），万一这个对象非常消耗资源，而程序在这次的执行过程中又一直没有用到它，这就造成的极大浪费。</p>
+</blockquote>
+<h2 id="懒汉式，线程不安全">懒汉式，线程不安全</h2><p>正式因为全局静态变量的缺点，所以引出了下面这种单例写法————懒汉式单例模式。<br><figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class <span class="built_in">Singleton</span> &#123;</span><br><span class="line"></span><br><span class="line">    private <span class="keyword">static</span> <span class="built_in">Singleton</span> <span class="built_in">singleton</span><span class="comment">;</span></span><br><span class="line"></span><br><span class="line">    private <span class="built_in">Singleton</span>() &#123;&#125;<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">    public <span class="keyword">static</span> <span class="built_in">Singleton</span> getInstance() &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">null</span> == <span class="built_in">singleton</span>) &#123;		//若为<span class="literal">null</span>,才会创建<span class="built_in">Singleton</span></span><br><span class="line">            <span class="built_in">singleton</span> = new <span class="built_in">Singleton</span>()<span class="comment">;</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">singleton</span><span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>懒汉式，就是懒加载，延迟加载的意思。<code>Singleton</code>对象只有在需要用到时，才会被创建。<br>很遗憾这种教科书式的写法存在一个致命的问题：线程不安全。在多个线程并行调用<code>getInstance()</code>创建单例时，有可能创建多个实例。</p>
+<h2 id="懒汉式，线程安全">懒汉式，线程安全</h2><p>为了解决线程安全问题，引出了下面的单例写法<br><figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> private</span><span class="keyword"> static</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> private</span><span class="function"> Singleton(</span><span class="function">)</span>&#123;&#125;;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> public</span><span class="keyword"> static</span> synchronized Singleton<span class="function"> getInstance(</span><span class="function">)</span>&#123;</span><br><span class="line">       <span class="instruction"> if </span>(null == instance<span class="function">)</span>&#123;</span><br><span class="line">           <span class="instruction"> instance </span>=<span class="instruction"> new </span>Singleton(<span class="function">)</span>;</span><br><span class="line">        &#125;</span><br><span class="line">       <span class="instruction"> return </span>instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>将<code>getInstance()</code>方法添加<code>synchronized</code>同步锁。这样就解决线程不安全的问题。<br>原理是<code>synchronized</code>用于修饰方法时，多线程并行时，只能有一个线程调用该方法。也就是说假如<code>Thread0</code> – <code>Thread9</code>十个线程按顺序调用<code>getInstance()</code>,只有<code>Thread0</code>调用完<code>Thread1</code>才能调用，然后是<code>Thread2</code>，以此类推直到<code>Thread9</code>。《Head First设计模式》上说同步一个方法可能造成程序执行效率下降100倍，所以说将<code>getInstance()</code>方法添加同步锁是一种非常低效的线程安全方式。</p>
+<h2 id="双重检验锁模式（double_checked_locking_pattern）">双重检验锁模式（double checked locking pattern）</h2><p>既要线程安全，又要保证程序执行效率，我们试着将代码优化一下。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">null</span> == instance) &#123;                 <span class="comment">//Single Checked</span></span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="keyword">null</span> == instance) &#123;         <span class="comment">//Double Checked</span></span><br><span class="line">                    instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在执行<code>getInstance()</code>获取实例时，首先判断是否已经有<code>Singleton</code>的实例，如果已经有了，返回已经存在的实例；如果没有，进入被<code>synchronized</code>修饰的同步代码块，同步对象为<code>Singleton.class</code>，如若为空，创建实例。<br>进行双重检验的原因是，如果不进行判断，<code>thread1</code>执行完<code>new Singleton()</code>，thread2有可能马上进入同步代码块，这时<code>instance</code>已经有实例了，有可能再次创建，所以必须要<code>Double Checked</code>，判断实例是否已经存在。</p>
+<p>这样写的目的是，既能保证线程安全（有同步代码块），同时兼顾效率（<code>synchronized</code>不修饰方法后提高了效率），一举两得。<br>看似很完美了，可惜仍然有一个问题，那就在<br><figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">instance</span> = new <span class="type">Singleton</span><span class="container">()</span>;</span></span><br></pre></td></tr></table></figure></p>
+<p>这一步，有可能会出现多个实例。<br>因为这并非是一个原子操作，事实上在 JVM 中这句话大概做了下面 3 件事情。（下面进入了复制时间，哈）<br><figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">给<span class="instruction"> instance </span>分配内存</span><br><span class="line">调用 Singleton 的构造函数来初始化成员变量</span><br><span class="line">将instance对象指向分配的内存空间（执行完这步<span class="instruction"> instance </span>就为非 null 了）</span><br></pre></td></tr></table></figure></p>
+<p>但是在 JVM 的即时编译器中存在指令重排序的优化。也就是说上面的第二步和第三步的顺序是不能保证的，最终的执行顺序可能是 1-2-3 也可能是 1-3-2。如果是后者，则在 3 执行完毕、2 未执行之前，被线程二抢占了，这时<code>instance</code>已经是非<code>null</code>了（但却没有初始化），所以线程二会直接返回<code>instance</code>，再使用就会报错。</p>
+<p>所以衍生出下面终极版：双重检验锁单例模式：<br><figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> private</span><span class="function"> Singleton(</span><span class="function">)</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> private</span> volatile<span class="keyword"> static</span> Singleton<span class="instruction"> instance </span>= null; //volatile 修饰成员变量 </span><br><span class="line"></span><br><span class="line">   <span class="keyword"> public</span> Singleton<span class="function"> getInstance(</span><span class="function">)</span> &#123;</span><br><span class="line">       <span class="instruction"> if </span>(null == instance<span class="function">)</span> &#123;                 //Single Checked</span><br><span class="line">            synchronized<span class="function"> (</span>Singleton.class<span class="function">)</span> &#123;</span><br><span class="line">               <span class="instruction"> if </span>(null == instance<span class="function">)</span> &#123;         //Double Checked</span><br><span class="line">                   <span class="instruction"> instance </span>=<span class="instruction"> new </span>Singleton(<span class="function">)</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">       <span class="instruction"> return </span>instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>有些人认为使用<code>volatile</code>的原因是可见性，也就是可以保证线程在本地不会存有<code>instance</code>的副本，每次都是去主内存中读取。但其实是不对的。使用 <code>volatile</code>的主要原因是其另一个特性：禁止指令重排序优化。也就是说，在<code>volatile</code>变量的赋值操作后面会有一个内存屏障（生成的汇编代码上），读操作不会被重排序到内存屏障之前。比如上面的例子，取操作必须在执行完 1-2-3 之后或者 1-3-2 之后，不存在执行到 1-3 然后取到值的情况。<br>从「先行发生原则」的角度理解的话，就是对于一个<code>volatile</code>变量的写操作都先行发生于后面对这个变量的读操作（这里的“后面”是时间上的先后顺序）。</p>
+<p>但是特别注意在<code>JDK1.5</code>以前的版本使用了<code>volatile</code>的双检锁还是有问题的。其原因是<code>JDK1.5</code>以前的<code>JMM(Java 内存模型)</code>是存在缺陷的，即时将变量声明成<code>volatile</code>也不能完全避免重排序，主要是<code>volatile</code>变量前后的代码仍然存在重排序问题。这个 <code>volatile</code>屏蔽重排序的问题在<code>JDK1.5</code>中才得以修复，所以在这之后才可以放心使用<code>volatile</code>。</p>
+<p>是不是觉着很复杂？下面有更好的实现线程安全的单例模式的办法。</p>
+<h2 id="饿汉式_static_final_field">饿汉式 static final field</h2><p>首先介绍一个不推荐的写法，就是前文提到的全局静态变量的方式。<br><figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">    //类在加载时就初始化</span><br><span class="line">   <span class="keyword"> private</span><span class="keyword"> static</span><span class="keyword"> final</span> Singleton<span class="instruction"> instance </span>=<span class="instruction"> new </span>Singleton(<span class="function">)</span>;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> private</span><span class="function"> Singleton(</span><span class="function">)</span>&#123;&#125;;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> public</span> Singleton<span class="function"> getInstance(</span><span class="function">)</span>&#123;</span><br><span class="line">       <span class="instruction"> return </span>instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这种写法会在加载类以后马上初始化一个实例，及时没有调用<code>getInstance()</code>.<br>饿汉式的创建方式在一些场景中将无法使用：譬如<code>Singleton</code>实例的创建是依赖参数或者配置文件的，在<code>getInstance()</code>之前必须调用某个方法设置参数给它，那样这种单例写法就无法使用了。</p>
+<h2 id="静态内部类_static_nested_class">静态内部类 static nested class</h2><figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> private</span><span class="keyword"> static</span> class SingletonHoler &#123;//静态内部类</span><br><span class="line">       <span class="keyword"> private</span><span class="keyword"> static</span><span class="keyword"> final</span> Singleton<span class="instruction"> instance </span>=<span class="instruction"> new </span>Singleton(<span class="function">)</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> private</span><span class="function"> Singleton(</span><span class="function">)</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line">   <span class="keyword"> public</span><span class="keyword"> static</span> Singleton<span class="function"> getInstance(</span><span class="function">)</span> &#123;</span><br><span class="line">       <span class="instruction"> return </span>SingletonHoler.instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>静态内部类的好处，可以参考《Effective Java》第22条：优先考虑静态内部类。<br>静态内部类的好处我简单总结一下：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">是外围类的一个静态成员，如果声明为私有，那么只能被外围类的内部访问。</span><br><span class="line">非静态内部类相对于静态内部类，每个实例都包含与外围类的一个外围实例相关联，也就是说访问非静态内部类，必须有个外围类的实例。从这个角度来看，静态内部类节省了虚拟机的内存，因为少创建了一个外围类的实例。</span><br></pre></td></tr></table></figure></p>
+<p>根据以上的两个特点，写静态内部类方式的单例有以下好处：<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">线程安全问题，即使多个线程同时访问<span class="function"><span class="title">getInstance</span><span class="params">()</span></span>，仍然会只创建一个SingletonHoler，同时创建一个Singleton实例；</span><br><span class="line">由于SingletonHolder是私有的，除了<span class="function"><span class="title">getInstance</span><span class="params">()</span></span>之外没有办法访问它，因此它是懒汉式的；</span><br><span class="line">同时读取实例的时候不会进行同步，提高了效率，没有性能缺陷；</span><br><span class="line">不依赖 JDK 版本。</span><br></pre></td></tr></table></figure></p>
+<p>至于他的缺点，很抱歉，我不知道，原因看下面。</p>
+<p>我在研究<a href="http://wuchong.me/blog/2014/08/28/how-to-correctly-write-singleton-pattern/" target="_blank" rel="external">如何正确地写出单例模式</a>  这篇文章时，作者说静态内部类是《Effective Java》所推荐的，实际上我并没有找到，只在《Effective Java》第3条中，找到了枚举单例模式。<br>所以说，我能力有限，静态内部类单例模式具体有啥缺点真的是未知。</p>
+<blockquote>
+<p>顺便多说一句，如果深根究底去研究一个东西，建议参考国外大神的文章，作为参考学习引用。国内作者的博客质量，参差不齐，保不准有错误。volatile的真正作用我也是一知半解，只能靠查了几篇文章，大概确定是对的。如果作者这块说的有错误，我也歇菜了…</p>
+</blockquote>
+<h2 id="枚举模式_Enum">枚举模式 Enum</h2><figure class="highlight capnproto"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public <span class="class"><span class="keyword">enum</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    INSTANCE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有没有懵逼的感觉？呵呵，是的，就是这么简洁，就是这么方便，就是这么骄傲（岳云鹏得意脸）！<br>调用也很方便：<code>Singleton instance = Singleton.INSTANCE</code>。<br>这样写除了简洁，好处实在太多：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">无偿提供了序列化机制，绝对防止多次实例化，即使实在复杂的序列化和反射攻击的时候；</span><br><span class="line">逼格高。</span><br></pre></td></tr></table></figure></p>
+<p>唯一的缺点就是仅限于JDK1.5以后才能使用。<br>知道你为什么没见过很多人这样写么？因为大家看书少啊，这是《Effective Java》所推荐的：<br><strong> 单元素枚举已经类型已经成为实现Singleton的最佳方法 </strong> ————引用《Effective Java》第三条。</p>
+<h2 id="总结">总结</h2><figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">推荐单例写法：双重检验锁和单例，静态内部类因为缺点为止，我不敢推荐;</span><br><span class="line">多读书，尤其是《Effective Java》、《<span class="keyword">Head</span> <span class="keyword">First</span>设计模式》这类精华书籍，绝对权威。</span><br><span class="line">国内博客作者的文章仅供参考（包括本文），因为大家多是用来总结积累，权威的参考，最好还是来自国外大神。</span><br></pre></td></tr></table></figure>
+<p>对枚举了解很少，这周试着撸一片枚举的文章~~</p>
+<p>参考文章：<a href="http://wuchong.me/blog/2014/08/28/how-to-correctly-write-singleton-pattern/" target="_blank" rel="external">如何正确地写出单例模式</a><br>《Head First设计模式》单件模式章节，以及《Effective Java》第3条，第22条。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Java/">Java</a>
+</div>
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://wangruiblog.com/20160424-正确的单例模式/" data-title="正确的单例模式 | 王潇贱的博客" data-tsina="王潇贱" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/20160423-富媒体调研/"  title="富媒体调研">
+ <strong>NEXT:</strong><br/> 
+ <span>富媒体调研
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#定义"><span class="toc-number">1.</span> <span class="toc-text">定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#懒汉式，线程不安全"><span class="toc-number">2.</span> <span class="toc-text">懒汉式，线程不安全</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#懒汉式，线程安全"><span class="toc-number">3.</span> <span class="toc-text">懒汉式，线程安全</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#双重检验锁模式（double_checked_locking_pattern）"><span class="toc-number">4.</span> <span class="toc-text">双重检验锁模式（double checked locking pattern）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#饿汉式_static_final_field"><span class="toc-number">5.</span> <span class="toc-text">饿汉式 static final field</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静态内部类_static_nested_class"><span class="toc-number">6.</span> <span class="toc-text">静态内部类 static nested class</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#枚举模式_Enum"><span class="toc-number">7.</span> <span class="toc-text">枚举模式 Enum</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/Android/" title="Android">Android<sup>4</sup></a></li>
+		
+			<li><a href="/categories/Java/" title="Java">Java<sup>2</sup></a></li>
+		
+			<li><a href="/categories/健康/" title="健康">健康<sup>1</sup></a></li>
+		
+			<li><a href="/categories/感悟/" title="感悟">感悟<sup>1</sup></a></li>
+		
+			<li><a href="/categories/旅游/" title="旅游">旅游<sup>12</sup></a></li>
+		
+			<li><a href="/categories/英语学习/" title="英语学习">英语学习<sup>5</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+  <div class="archiveslist">
+    <p class="asidetitle"><a href="/archives">归档</a></p>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">17</span></li></ul>
+  </div>
+
+
+  
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+      <li><a href="http://yangjian.me" target="_blank" title="YangJian">Alimon's Blog</a></li>
+      <li><a href="http://hexo.io" target="_blank" title="Hexo">Hexo</a></li>
+    </ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 欢迎来到我的博客 <br/>
+			记录，积累，分享，过自己喜欢的生活</p>
+	</section>
+	 
+	<div class="social-font clearfix">
+		
+		<a href="http://weibo.com/wrwxj" target="_blank" title="weibo"></a>
+		
+		
+		<a href="https://twitter.com/wrwxj" target="_blank" title="twitter"></a>
+		
+		
+		<a href="https://github.com/wangxj" target="_blank" title="github"></a>
+		
+		
+		
+		
+        <a href="https://www.instagram.com/wangrui1988" target="_blank" title="instagram"></a>
+        
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2016 
+		
+		<a href="http://wangruiblog.com" target="_blank" title="王潇贱">王潇贱</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"wangruiblog"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-67830532-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+  </body>
+</html>
